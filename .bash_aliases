@@ -15,3 +15,11 @@ alias give115='mv /media/ari/20CA-2E5D/6.115/ /media/ari/20CA-2E5D/6.115old/; rm
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+alias diaryc="mv -v ~/Refl/entries ~/Refl/entries_backup/entries_$(date +%y-%m-%d_%H:%M:%S); diary -c"
+
+alias tv-left="~/code/tvlt1421_ubuntu/thinkvision-set-left.bash on"
+
+alias tv-right="~/code/tvlt1421_ubuntu/thinkvision-set-right.bash on"
+alias tv-off="~/code/tvlt1421_ubuntu/thinkvision-set-right.bash off"
+
+alias betafiles='echo "philisold" | sshfs -o password_stdin oxen@betafiles.mit.edu:/srv/betafiles ~/betafiles' 

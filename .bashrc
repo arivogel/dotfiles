@@ -144,4 +144,4 @@ export PATH="/usr/local/heroku/bin:$PATH"
 
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 [[ -s '/home/ari/.rvm/scripts/rvm' ]] && source '/home/ari/.rvm/scripts/rvm'
-source /etc/bash_completion.d/password-store
+

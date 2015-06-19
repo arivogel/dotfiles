@@ -19,7 +19,7 @@ diary(){
 					echo "Could not open diary because of gpg failure."
 					return 1
 				fi;;
-                        c) mv "${diarypath}" "~/Refl/entries_backup/${diaryfile}_$(date +%y-%m-%d_%H:%M:%S)"; #first backup the diary file in case of any problems 
+                        c) #mv "${diarypath}" "~/Refl/entries_backup/${diaryfile}_$(date +%y-%m-%d_%H:%M:%S)"; #first backup the diary file in case of any problems 
                         gpg --output ${diarypath} --symmetric ${diarypath}.txt;
                                 if [ "$?" = "0" ]; then
                                         rm ${diarypath}.txt
