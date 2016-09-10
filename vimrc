@@ -4,6 +4,8 @@ set runtimepath=~/.vim,$VIMRUNTIME
 " set variables needed for 256 color
 set term=xterm-256color
 
+execute pathogen#infect()
+
 " use the solarized color scheme
 syntax enable
 "let g:solarized_termcolors=256

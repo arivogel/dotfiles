@@ -53,3 +53,4 @@ getopts_test(){
 
 ##############end delete section
 
+source ~/dotfiles/togl

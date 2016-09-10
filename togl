@@ -1,0 +1,91 @@
+#!/bin/bash
+
+HELP_MESSAGE="
+# togl, a task tracker.
+# usage:
+#      -h          Show help (this message)
+#      -s          Show basic stats.
+#      -t          Print available tasks
+#      <task>      Start logging time in a task"
+
+TASK_LIST_PATH="$HOME/.togl/all_tasks"
+
+function parse_opts(){
+    while true; do
+        case "$1" in
+            -h)
+                echo "$HELP_MESSAGE"; return 1;;
+            
+            -s)
+                echo "summary"; return 1;;
+            -t)
+                echo "tasks: "; 
+                printf '   %s' "${ALL_TASKS[@]}"; return 1;;
+            *)
+                return 0;;
+        esac
+    done
+}
+
+function togl(){            
+    # read tasks from TASK_LIST_PATH
+    readarray ALL_TASKS < $TASK_LIST_PATH
+
+    parse_opts $@
+
+    TASK=$1
+
+    is_in=$(array_contains $TASK ${ALL_TASKS[@]})
+    
+    if [[ is_in -eq "0" ]]; then
+        log_data $TASK
+    elif [[ "$TASK" == "end" ]]; then
+        echo "end task"
+        log_end_time
+    fi
+}
+
+# check if first argument is a list (rest of args).
+# $1: element you're looking for
+# $2-$N: list to search through
+function array_contains () {
+    local seeking=$1; shift
+    for element; do
+        if [ $element == $seeking ]; then
+            echo "0"
+            return
+        fi
+    done
+    echo "1"
+}
+
+# log task to daily worklog
+# $1:  task
+function log_data() {
+    CUR_TIME=$(date +%H:%M:%S);
+    worklog_path="$HOME/.togl/worklog/$(date +%y)/$(date +%m)/$(date +%d)"
+    worklog_dir=$(dirname $worklog_path)
+    TASK=$1
+
+    # create parent directories for daily worklog.
+    if [[ ! -e $worklog_dir ]]; then
+        echo "file doesn't exist (yet)";
+        mkdir -p $worklog_dir
+    fi
+
+    # don't put 'end time' if this is the first task of the day.
+    if [[ -e $worklog_path.in_prog ]]; then
+        log_end_time
+    fi
+
+    echo -n "$TASK $CUR_TIME" >> $worklog_path
+    touch $worklog_path.in_prog
+    echo "started $TASK"
+}
+
+function log_end_time() {
+    CUR_TIME=$(date +%H:%M:%S);
+    worklog_path="$HOME/.togl/worklog/$(date +%y)/$(date +%m)/$(date +%d)"
+    echo " $CUR_TIME" >> $worklog_path
+    rm $worklog_path.in_prog
+}
