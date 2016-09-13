@@ -1,49 +1,89 @@
 #!/bin/bash
 
-HELP_MESSAGE="
-# togl, a task tracker.
+TOGL_HELP_MESSAGE="
+# togl, a task tracker. Start working on a task with 'togl <task>'
+# switch tasks you're working on with 'togl <next_task>'
+# finish your current task, but don't start the next one with
+# 'togl end'
+#
 # usage:
-#      -h          Show help (this message)
-#      -s          Show basic stats.
-#      -t          Print available tasks
-#      <task>      Start logging time in a task"
+#      -h --help          Show help (this message)
+#      -s --summary       Show basic stats.
+#      -t --tasks         Print available tasks
+#      -a --add-task      Add a new task to the available tasks
+#      <task>             Start logging time in a task
+#      end                End the current task you're working on"
 
-TASK_LIST_PATH="$HOME/.togl/all_tasks"
+
+function setup_env() {
+    TASK_LIST_PATH="$HOME/.togl/all_tasks";
+    CUR_TIME=$(date +%T);
+    TOGL_WORKLOG_PATH="$HOME/.togl/worklog/$(date +%y)/$(date +%m)/$(date +%d)"
+    TOGL_WORKLOG_DIR=$(dirname $TOGL_WORKLOG_PATH)
+
+    # clear ALL_TASKS
+    unset ALL_TASKS[@]
+}
 
 function parse_opts(){
     while true; do
         case "$1" in
             -h)
-                echo "$HELP_MESSAGE"; return 1;;
+                echo "$TOGL_HELP_MESSAGE"; return 1;;
+            --help)
+                echo "$TOGL_HELP_MESSAGE"; return 1;;
             
             -s)
-                echo "summary"; return 1;;
+                todays_summary
+                return 1;;
+            --summary)
+                todays_summary
+                return 1;;
             -t)
                 echo "tasks: "; 
                 printf '   %s' "${ALL_TASKS[@]}"; return 1;;
+            --tasks)
+                echo "tasks: "; 
+                printf '   %s' "${ALL_TASKS[@]}"; return 1;;
+            -a)
+                new_task=$2;
+                add_task $new_task
+                return 1;
+                ;;
+            --add-task)
+                new_task=$2;
+                add_task $new_task
+                return 1;
+                ;;
             *)
                 return 0;;
         esac
     done
 }
 
-function togl(){            
-    # read tasks from TASK_LIST_PATH
-    readarray ALL_TASKS < $TASK_LIST_PATH
+# print simple daily summary
+# sum of time spent in each task
+function todays_summary () {
+    # create the task_dict to sum minutes spent in each task
+    declare -A task_dict
 
-    parse_opts $@
+    # parse today's worklog.  get time diff (in minutes)
+    # and create sum.
+    while read line; do
+        words=( $line );
+        TASK="${words[0]}";
+        START_TIME="${words[1]}"
+        END_TIME="${words[2]}"
+        time_diff=$(time_diff $START_TIME $END_TIME)
+        task_dict[$TASK]=`expr ${task_dict[$TASK]} + $time_diff`
+    done <$TOGL_WORKLOG_PATH
 
-    TASK=$1
-
-    is_in=$(array_contains $TASK ${ALL_TASKS[@]})
-    
-    if [[ is_in -eq "0" ]]; then
-        log_data $TASK
-    elif [[ "$TASK" == "end" ]]; then
-        echo "end task"
-        log_end_time
-    fi
+    # print summary
+    for task in "${!task_dict[@]}"; do
+        echo "$task - ${task_dict[$task]} minutes"
+    done
 }
+
 
 # check if first argument is a list (rest of args).
 # $1: element you're looking for
@@ -59,33 +99,92 @@ function array_contains () {
     echo "1"
 }
 
+function add_task() {
+  new_task=$1;
+  if [ -z "$new_task" ]; then
+    echo "to use --add-task, you must provide a new task name."
+  else
+    echo "$new_task" >> $TASK_LIST_PATH
+    echo "added $new_task to list of available tasks"
+  fi
+}
+
 # log task to daily worklog
 # $1:  task
 function log_data() {
-    CUR_TIME=$(date +%H:%M:%S);
-    worklog_path="$HOME/.togl/worklog/$(date +%y)/$(date +%m)/$(date +%d)"
-    worklog_dir=$(dirname $worklog_path)
     TASK=$1
 
     # create parent directories for daily worklog.
-    if [[ ! -e $worklog_dir ]]; then
+    if [[ ! -e $TOGL_WORKLOG_DIR ]]; then
         echo "file doesn't exist (yet)";
-        mkdir -p $worklog_dir
+        mkdir -p $TOGL_WORKLOG_DIR
     fi
 
     # don't put 'end time' if this is the first task of the day.
-    if [[ -e $worklog_path.in_prog ]]; then
+    if [[ -e $TOGL_WORKLOG_PATH.in_prog ]]; then
         log_end_time
     fi
 
-    echo -n "$TASK $CUR_TIME" >> $worklog_path
-    touch $worklog_path.in_prog
+    echo -n "$TASK $CUR_TIME" >> $TOGL_WORKLOG_PATH
+    touch $TOGL_WORKLOG_PATH.in_prog
     echo "started $TASK"
 }
 
 function log_end_time() {
-    CUR_TIME=$(date +%H:%M:%S);
-    worklog_path="$HOME/.togl/worklog/$(date +%y)/$(date +%m)/$(date +%d)"
-    echo " $CUR_TIME" >> $worklog_path
-    rm $worklog_path.in_prog
+    echo " $CUR_TIME" >> $TOGL_WORKLOG_PATH
+    rm $TOGL_WORKLOG_PATH.in_prog
+}
+
+# find the difference between start and end time
+#  $1: start time, format HH:MM:SS
+#  $2: end   time, format HH:MM:SS
+function time_diff() {
+  START_TIME=$1;
+  END_TIME=$2;
+
+  START_HOUR=$(echo $START_TIME | awk -F: '{print $1}')
+  START_MIN=$(echo $START_TIME  | awk -F: '{print $2}')
+
+  END_HOUR=$(echo $END_TIME | awk -F: '{print $1}')
+  END_MIN=$(echo $END_TIME  | awk -F: '{print $2}')
+
+  DIFF_MINS=`expr $END_MIN - $START_MIN`
+  DIFF_HOURS=`expr $END_HOUR - $START_HOUR`
+
+  for hour in $(seq 1 $DIFF_HOURS); do
+      DIFF_MINS=`expr $DIFF_MINS + 60`
+  done
+
+  echo "$DIFF_MINS"
+}
+
+# main function
+function togl(){            
+    # assign variables used in misc functions
+    setup_env
+
+    # read tasks from TASK_LIST_PATH
+    readarray ALL_TASKS < $TASK_LIST_PATH 2> /dev/null
+
+    # parse opts and return early if a flag was caught.
+    parse_opts $@
+    if [[ $? == 1 ]]; then
+      return
+    fi
+
+    TASK=$1
+    is_in=$(array_contains $TASK ${ALL_TASKS[@]})
+    
+    if [[ is_in -eq "0" ]]; then
+        log_data $TASK
+    elif [[ "$TASK" == "end" ]]; then
+        echo "ended current task."
+        log_end_time
+    elif [ -z "$TASK" ]; then
+        echo "$TOGL_HELP_MESSAGE";
+    else 
+        echo "$TASK is not in your current list of tasks."
+        echo "You can add it to your list of tasks with:"
+        echo "togl --add-task $TASK"
+    fi
 }
