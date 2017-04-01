@@ -1,25 +1,120 @@
-# a file of aliases, personalized for my use of the command line
+# a file of bash aliases created by me (vogelari) for workflow optimization
+MYALIASES=("cscopesetup, cfind, cherry-pick-from, hex_to_str, mark, jump")
 
-# some custom aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias lh='ls -la ~/ | more' #addition, list hidden/dot files
-alias viber='/home/ari/Viber/Viber.sh'
-alias edwin='mit-scheme --edit --large'
-alias sshcloud='sshfs avogel@cloud3.csail.mit.edu:/afs/csail.mit.edu/u/a/avogel ~/school/6.172/cloud; subl ~/school/6.172/cloud ;ssh avogel@cloud3.csail.mit.edu'
-alias afsconnect='umount -l ~/school/6.172/cloud; sshfs avogel@cloud3.csail.mit.edu:/afs/csail.mit.edu/u/a/avogel ~/school/6.172/cloud'
-alias get115='rsync -av /media/ari/20CA-2E5D/6.115/ /home/ari/school/6.115/'
-alias give115='mv /media/ari/20CA-2E5D/6.115/ /media/ari/20CA-2E5D/6.115old/; rm -r /media/ari/20CA-2E5D/6.115/;rsync -av /home/ari/school/6.115/ /media/ari/20CA-2E5D/6.115/'
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+# generic cscope setup.  find all files ending in .c or .h
+alias cscopesetup='find . -name "*\.[ch]" -print > cscope.files; find . -name "*\.[ch]" | xargs etags -a'
 
-alias diaryc="mv -v ~/Refl/entries ~/Refl/entries_backup/entries_$(date +%y-%m-%d_%H:%M:%S); diary -c"
+# run a command with the output of previous command
+# this is really just a nice xargs wrapper
+# XXX: not tested
+# arguments
+#       $1 :   command to run
+#       $2 :   line of output to use
+function use_prev_n {
+    touse=$(fc -e : -1 | head -n $2)
+    echo "touse: $touse"
+    fc -e : -1 | head -n "$2" | tail -n 1 | xargs "$1"
+}
 
-alias tv-left="~/code/tvlt1421_ubuntu/thinkvision-set-left.bash on"
 
-alias tv-right="~/code/tvlt1421_ubuntu/thinkvision-set-right.bash on"
-alias tv-off="~/code/tvlt1421_ubuntu/thinkvision-set-right.bash off"
+# convert hex to string.
+# Useful for authlog reading
+function hex_to_str {
+    echo "$1" | xxd -r -p
+    echo ""
+}
 
-alias betafiles='echo "philisold" | sshfs -o password_stdin oxen@betafiles.mit.edu:/srv/betafiles ~/betafiles' 
+
+# use with findngrep <files to search pattern> <pattern to find in files>
+# not working right now
+function findngrep {
+    echo 'find . -name "$1" | xargs grep -nH "$2"'
+	find . -name "$1" | xargs grep -nH "$2";
+}
+
+#grep all .c, .h files in the current directory
+function cfind {
+    echo "find . -name '*.[ch]' | xargs grep $1"
+    find . -name "*.[ch]" | xargs grep "$1"
+}
+
+#shorthand for tmux a -t $session
+function ta {
+    tmux a -t $1
+}
+
+# function to cherry-pick a commit from another directory.  Useful for pulling
+# Commits from another develroot.  Usage:
+# cherry-pick-from <directory> <commit sha>
+function cherry-pick-from {
+    git --git-dir="$1"/.git format-patch -k -1 --stdout "$2" | git am -3 -k
+}
+
+#stupid shortcuts to make life easier (ie forget about flags)
+alias cpr='cp -r'
+
+### non-functional aliases to keep track of tools:
+#python pep8 style checker
+#docs: https://flake8.readthedocs.org/en/latest/
+#alias flake8='flake8'
+
+export MARKPATH=$HOME/.marks
+function jump {
+    cd -P "$MARKPATH/$1" 2>/dev/null || echo "No such mark: $1"
+}
+
+function mark {
+    mkdir -p "$MARKPATH"; ln -s "$(pwd)" "$MARKPATH/$1"
+}
+
+function unmark {
+    rm -i "$MARKPATH/$1"
+}
+
+function marks {
+    ls -l "$MARKPATH"| sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/\t-/g' && echo
+}
+
+# from kentf
+ggrep() {
+    local c
+    local depth=50
+    local pattern
+    local res
+    local only1=true
+    local usage="ggrep [ -a ] [ -<n> ] pattern"
+
+    while [ $# -gt 0 ]; do
+        case $1 in
+        -a) only1=false
+            shift
+            ;;
+        -[0123456789]*)
+            depth=$1
+            shift
+            ;;
+        --) shift
+            break
+            ;;
+        -*|?)  echo "$usage" 1>&2
+            return 1
+            ;;
+        *)  break
+            ;;
+        esac
+    done
+
+    if [ $# -ne 1 ]; then
+        echo "$usage" 1>&2
+        return 1
+    fi
+
+    pattern="$1"
+
+    for c in `git log --abbrev-commit --decorate --pretty=format:'%h' -$depth`; do
+        if res=`git grep -ne "$pattern" $c`; then
+            echo $res
+            $only1 && break
+        fi
+    done
+}

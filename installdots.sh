@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #################
 #   make.sh
 #   A script to create symlinks from the home directory
@@ -11,10 +12,8 @@
 dotdir=~/dotfiles
 olddir=~/dotfiles_old   # backup any old dotfiles to this directory
 
-
-
 # first backup existing dotfiles
-echo -n "Creating $olddir for backup of existing dotfiles"
+echo -n "Creating $olddir for backup of existing dotfiles..."
 mkdir -p $olddir
 echo "done"
 
@@ -32,5 +31,3 @@ for file in *; do
 		fi
 	fi
 done
-
-

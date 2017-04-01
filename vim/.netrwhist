@@ -1,0 +1,11 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =9
+let g:netrw_dirhist_1='/local/home/vogelari/workspace/AlmachRepos/HealthChecks/build/AlmachHealthCheckServer/AlmachHealthCheckServer-1.0/RHEL5_64/DEV.STD.PTHREAD/build'
+let g:netrw_dirhist_2='/local/home/vogelari/workspace/AlmachRepos/HealthChecks/build/AlmachHealthCheckServer/AlmachHealthCheckServer-1.0/RHEL5_64/DEV.STD.PTHREAD/build/bin'
+let g:netrw_dirhist_3='/local/home/vogelari/workspace/deepdive/knet/iperf_testing_results/multi_iperf_tests_6710/iperf_data/10_conns_200m_per_conn'
+let g:netrw_dirhist_4='/local/home/vogelari/workspace/ndtest-dev/config'
+let g:netrw_dirhist_5='/local/home/vogelari/workspace/develroots/t2080root/sources/almach-conf/etc/cron.d'
+let g:netrw_dirhist_6='/local/home/vogelari/workspace/develroots/t2080root/sources/quagga/watchquagga'
+let g:netrw_dirhist_7='/local/home/vogelari/workspace/develroots/t2080root5/sources/almach-conf/platform-config/usr/share/platform-config/accton/as6710_32x/etc/cumulus.d'
+let g:netrw_dirhist_8='/local/home/vogelari/workspace/ndtest-suite/src/AlmachBasicNDTestSuite/device_configs/2almach_1link_ipip_tunnel_basic_configs/Router1/etc/network'
+let g:netrw_dirhist_9='/local/home/vogelari/workspace/develroots/t2080root5/sources/almach-scripts'

@@ -1,0 +1,11 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =9
+let g:netrw_dirhist_1='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferWatcher/device_bin'
+let g:netrw_dirhist_2='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferWatcher/bin/output'
+let g:netrw_dirhist_3='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferWatcher/bin/output/pdq2'
+let g:netrw_dirhist_4='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferWatcher/device_bin'
+let g:netrw_dirhist_5='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferWatcher'
+let g:netrw_dirhist_6='/home/local/ANT/vogelari/.vim/plugin'
+let g:netrw_dirhist_7='/home/local/ANT/vogelari/AlmachRepos/AlmachBufferData/iad6-6-ws-c1-b3-t1-r2_vogelari_8min/data'
+let g:netrw_dirhist_8='/home/local/ANT/vogelari/develroot/sources/sfpd/tests'
+let g:netrw_dirhist_9='/home/local/ANT/vogelari/AlmachRepos/AlmachDistributedFilestore/config_store'

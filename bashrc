@@ -35,6 +35,7 @@ fi
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm-color) color_prompt=yes;;
+    xterm-256color) color_prompt=yes;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -53,6 +54,7 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
+# default prompt setup.  Can be overridden by a 'source' at the bottom
 if [ "$color_prompt" = yes ]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[31m\]\u@\h\[\033[00m\]:\[\033[36m\]\w\[\033[1m\] $ ' 
 else
@@ -80,14 +82,36 @@ if [ -x /usr/bin/dircolors ]; then
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# when a session starts, if tmux is running list the running tmux sessions:
+if [ -x $TMUX ]; then
+    echo "Currently running tmux sessions:"
+    tmux list-sessions
+fi
+
 # Alias and function inclusion.
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# Amazon specific bash alias/functions
+if [ -f ~/.bash_amazon_specific ]; then
+    . ~/.bash_amazon_specific
+fi
+
 if [ -f ~/.bash_functions ]; then
 	. ~/.bash_functions
 fi
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
@@ -95,25 +119,15 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-# this adds the jump, mark, unmark, and marks.  
-# These give shorcuts for navigation
-export MARKPATH=$HOME/.marks
-function jump { 
-    cd -P $MARKPATH/$1 2>/dev/null || echo "No such mark: $1"
-}
-function mark { 
-    mkdir -p $MARKPATH; ln -s $(pwd) $MARKPATH/$1
-}
-function unmark { 
-    rm -i $MARKPATH/$1 
-}
-function marks {
-    ls -l $MARKPATH | sed 's/  / /g' | cut -d' ' -f9- | sed 's/ -/\t-/g' && echo
-}
+## some configs from sensible.bash https://github.com/mrzool/bash-sensible/blob/master/sensible.bash
+# Perform file completion in a case insensitive fashion
+bind "set completion-ignore-case on"
 
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
+# Treat hyphens and underscores as equivalent
+bind "set completion-map-case on"
 
+# Append to the history file, don't overwrite it
+shopt -s histappend
 
-#PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-#[[ -s '/home/ari/.rvm/scripts/rvm' ]] && source '/home/ari/.rvm/scripts/rvm'
+# Save multi-line commands as one command
+shopt -s cmdhist
