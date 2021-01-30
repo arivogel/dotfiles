@@ -35,7 +35,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (rustic colemak-evil exec-path-from-shell powerline lsp-ivy org-bullets counsel avy ivy helm go-projectile go-autocomplete company-shell company-ctags company-math company-go projectile flycheck yasnippet-snippets auto-complete go-mode neotree doom-themes lsp-mode evil))))
+    (markdown-preview-mode rustic colemak-evil exec-path-from-shell powerline lsp-ivy org-bullets counsel avy ivy helm go-projectile go-autocomplete company-shell company-ctags company-math company-go projectile flycheck yasnippet-snippets auto-complete go-mode neotree doom-themes lsp-mode evil))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -157,7 +157,8 @@
 (setq org-agenda-files (quote ("~/workspace/workspace.org"
                                "~/Documents/health.org"
                                "~/Documents/financial/financials.org"
-                               "~/Documents/home.org")))
+                               "~/Documents/home.org"
+			       "~/org/gtd.org")))
 
 (setq org-todo-keywords
       (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
@@ -179,3 +180,25 @@
 
 ;; load any saved 'desktop' on startup
 ;;(desktop-save-mode 1)
+
+;; I don't like having backup files alongside my source files.
+;; Put all backups into ~/.emacs-saves
+;; https://stackoverflow.com/questions/151945/how-do-i-control-how-emacs-makes-backup-files
+(setq backup-directory-alist `(("." . "~/.emacs-saves")))
+
+;; safe but slowest option, make backups by copying
+(setq backup-by-copying t)
+
+;; keep some history
+(setq delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
+;; org capture
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+
+(setq org-capture-templates
+      '(("r" "Reference" entry
+	 (file+headline "~/workspace/workspace.org" "References")
+	 "* DEMO HEADER TEXT %?")))
